@@ -1,0 +1,43 @@
+﻿#include "hsp3utf.as"
+#packopt hide 1
+#packopt name "mica_prompt"
+#packopt icon "icon.ico"
+#include "shell32.as"
+#uselib "kernel32.dll"
+#func Wow64DisableWow64FsRedirection "Wow64DisableWow64FsRedirection" var
+#func Wow64RevertWow64FsRedirection "Wow64RevertWow64FsRedirection" var
+#uselib "dwmapi.dll"
+#func global DwmSetWindowAttribute "DwmSetWindowAttribute" int, int, int, int
+#func global DwmExtendFrameIntoClientArea "DwmExtendFrameIntoClientArea" int,int
+#define DWMWA_USE_HOSTBACKDROPBRUSH 17            
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#define DWMWA_SYSTEMBACKDROP_TYPE 38
+#define SW_SHOWNORMAL $0001
+
+#include "user32.as"
+if varptr(DwmSetWindowAttribute)=0:end 0
+
+randomize
+
+cmd = FindWindowW("ConsoleWindowClass",0)
+wait 5
+if cmd=0{
+	OldValue = 0
+	Wow64DisableWow64FsRedirection OldValue
+	ShellExecuteW hwnd,"open",dir_sys+"\\cmd.exe",dir_cmdline,NULL,SW_SHOWNORMAL
+	wait 25
+	cmd = FindWindowW("ConsoleWindowClass",0)
+	Wow64RevertWow64FsRedirection OldValue
+}else{
+	ShowWindow cmd,5
+}
+wait 5
+if cmd=0:end 0
+margins=-1,0,0,0
+DwmExtendFrameIntoClientArea cmd,varptr(margins)
+opt = 1
+DwmSetWindowAttribute cmd,DWMWA_USE_IMMERSIVE_DARK_MODE,varptr(opt),4
+opt = 2 + rnd(3)
+DwmSetWindowAttribute cmd,DWMWA_SYSTEMBACKDROP_TYPE,varptr(opt),4
+if stat:end 0:else:end 1
+end
